@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Inter"; font-weight: 400; font-display: block; src: url("fonts/Inter-400.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 500; font-display: block; src: url("fonts/Inter-500.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 600; font-display: block; src: url("fonts/Inter-600.woff2") format("woff2"); }
+      @font-face { font-family: "JetBrains Mono"; font-weight: 400; font-display: block; src: url("fonts/JetBrainsMono-400.woff2") format("woff2"); }
+      @font-face { font-family: "JetBrains Mono"; font-weight: 500; font-display: block; src: url("fonts/JetBrainsMono-500.woff2") format("woff2"); }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1080px; overflow: hidden; background: #1B1A17; color: #ECE7DD; font-family: "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
+      #app { position: absolute; inset: 0; background: #1B1A17; }
+      svg { display: block; }
+
+      /* ---------- HOME ---------- */
+      #home { position: absolute; inset: 0; }
+      #inputbox { position: absolute; left: 90px; width: 900px; top: 440px; height: 198px; background: #26241F; border: 1.5px solid #38352D; border-radius: 22px; }
+      #inputbox .ph { position: absolute; left: 30px; top: 30px; font-size: 30px; color: #8A857A; }
+      #typedwrap { position: absolute; left: 30px; right: 30px; top: 30px; font-size: 30px; color: #ECE7DD; line-height: 1.36; }
+      #caret { display: inline-block; width: 3px; height: 30px; background: #D8795B; margin-left: 3px; vertical-align: -4px; }
+      #inputbox .barL { position: absolute; left: 26px; bottom: 24px; width: 30px; height: 30px; border: 2px solid #5A564C; border-radius: 8px; color: #8A857A; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+      #inputbox .barR { position: absolute; right: 28px; bottom: 26px; font-size: 22px; color: #9B968C; }
+      #inputbox .barR b { color: #C7C2B7; font-weight: 500; }
+      #chips { position: absolute; left: 0; right: 0; top: 680px; display: flex; justify-content: center; gap: 12px; }
+      #chips .chip { padding: 11px 18px; border: 1.5px solid #38352D; border-radius: 12px; color: #B6B1A6; font-size: 21px; }
+
+      /* ---------- CONVERSATION (scroll viewport) ---------- */
+      #convo { position: absolute; inset: 0; opacity: 0; }
+      #thread { position: absolute; top: 0; left: 0; width: 1080px; }
+
+      .umsg { position: absolute; right: 90px; max-width: 760px; background: #26241F; border: 1.5px solid #38352D; border-radius: 20px 20px 6px 20px; padding: 22px 28px; font-size: 30px; color: #ECE7DD; line-height: 1.36; }
+
+      #workhead { position: absolute; left: 90px; width: 900px; top: 200px; display: flex; align-items: center; justify-content: space-between; }
+      #workhead .wleft { display: flex; align-items: center; gap: 18px; }
+      #workhead .wt { font-size: 30px; color: #9B968C; }
+
+      .pay { display: inline-flex; align-items: center; gap: 9px; font-family: "JetBrains Mono", monospace; font-size: 19px; color: #9DB4FF; background: #15173A; border: 1px solid #2C2F60; border-radius: 8px; padding: 6px 12px; }
+      #total { display: inline-flex; align-items: center; gap: 10px; font-family: "JetBrains Mono", monospace; font-size: 21px; color: #B9C4FF; background: #15173A; border: 1px solid #2C2F60; border-radius: 8px; padding: 6px 13px; }
+      .basesq { width: 18px; height: 18px; border-radius: 5px; background: #1A14F5; flex: 0 0 18px; }
+      #total .basesq { width: 20px; height: 20px; }
+      .sent { font-family: "JetBrains Mono", monospace; font-size: 19px; color: #7FD6A2; background: #122A1E; border: 1px solid #235B40; border-radius: 8px; padding: 6px 12px; }
+
+      #timeline { position: absolute; left: 90px; top: 262px; width: 900px; }
+      #conn { position: absolute; left: 19px; top: 20px; width: 2px; height: 416px; background: #38352D; transform-origin: top center; }
+      .trow { position: absolute; left: 0; width: 900px; display: flex; align-items: flex-start; gap: 26px; }
+      .ticon { width: 40px; height: 40px; flex: 0 0 40px; display: flex; align-items: center; justify-content: center; background: #1B1A17; border-radius: 9px; }
+      .ticon .amark { width: 34px; height: 34px; }
+      .tbody { flex: 1; padding-top: 1px; }
+      .tlabel { font-size: 31px; font-weight: 400; color: #E4DFD5; letter-spacing: -0.01em; }
+      .tchips { margin-top: 11px; display: flex; gap: 11px; align-items: center; flex-wrap: wrap; }
+      .tchip { font-family: "JetBrains Mono", monospace; font-size: 18px; color: #B6B1A6; background: #26241F; border: 1px solid #38352D; border-radius: 8px; padding: 6px 12px; }
+
+      .atext { position: absolute; left: 90px; width: 900px; font-size: 29px; line-height: 1.42; color: #ECE7DD; }
+
+      /* draft card */
+      #draft { position: absolute; left: 90px; top: 1030px; width: 860px; background: #211F1A; border: 1.5px solid #3A372F; border-radius: 18px; padding: 28px 32px; }
+      #draft .dhead { display: flex; align-items: center; gap: 14px; }
+      #draft .dtitle { font-family: "JetBrains Mono", monospace; font-size: 20px; letter-spacing: 0.16em; color: #C9A06B; text-transform: uppercase; }
+      #draft .dnote { font-size: 21px; color: #8A857A; }
+      #draft .dto { margin-top: 16px; font-family: "JetBrains Mono", monospace; font-size: 21px; color: #9B968C; }
+      #draft .dbody { margin-top: 16px; font-size: 28px; line-height: 1.4; color: #ECE7DD; }
+      #draft .pencil { width: 22px; height: 22px; }
+    </style>
+  </head>
+  <body>
+    <div id="app" data-composition-id="main" data-start="0" data-duration="26" data-width="1080" data-height="1080">
+
+      <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+        <symbol id="apify" viewBox="0 0 200 200">
+          <path d="M114.695 0H196.97C198.643 0 200 1.357 200 3.03V128.766C200 131.778 196.083 132.945 194.434 130.425L112.159 4.69C110.841 2.674 112.287 0 114.695 0Z" fill="#246DFF"/>
+          <path d="M85.305 0H3.03C1.357 0 0 1.357 0 3.03V128.766C0 131.778 3.917 132.945 5.566 130.425L87.84 4.69C89.159 2.674 87.713 0 85.305 0Z" fill="#20A34E"/>
+          <path d="M98.591 100.668L5.127 194.835C3.229 196.747 4.583 200 7.278 200H192.8C195.483 200 196.842 196.77 194.967 194.852L102.908 100.685C101.726 99.475 99.782 99.468 98.591 100.668Z" fill="#F86606"/>
+        </symbol>
+      </svg>
+
+      <!-- ============ HOME ============ -->
+      <div id="home">
+        <div id="inputbox">
+          <div class="ph" id="ph">How can I help you today?</div>
+          <div id="typedwrap"><span id="typed"></span><span id="caret"></span></div>
+          <div class="barL">+</div>
+          <div class="barR">Opus 4.8 <b>High</b> &#9662;</div>
+        </div>
+        <div id="chips">
+          <div class="chip">Write</div>
+          <div class="chip">Learn</div>
+          <div class="chip">Code</div>
+          <div class="chip">Life stuff</div>
+          <div class="chip">Claude&#8217;s choice</div>
+        </div>
+      </div>
+
+      <!-- ============ CONVERSATION ============ -->
+      <div id="convo" data-layout-allow-overflow>
+        <div id="thread" data-layout-allow-overflow>
+          <div class="umsg" id="usermsg" style="top:40px;">Find me a duplex under $400k in Columbus that could cash-flow as a rental.</div>
+
+          <div id="workhead">
+            <div class="wleft">
+              <svg id="spinner" width="34" height="34" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="#3A372F" stroke-width="2.6"/>
+                <circle cx="12" cy="12" r="9" stroke="#D8795B" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="16 100"/>
+              </svg>
+              <span class="wt" id="wt">Working</span>
+            </div>
+            <span id="total"><span class="basesq"></span><span id="totval">$0.00</span> USDC</span>
+          </div>
+
+          <div id="timeline">
+            <div id="conn"></div>
+
+            <div class="trow" id="r1" style="top:0px;">
+              <div class="ticon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#9B968C" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></div>
+              <div class="tbody"><div class="tlabel">Finding tools</div><div class="tchips"><span class="tchip">4 Apify actors</span></div></div>
+            </div>
+
+            <div class="trow" id="r2" style="top:104px;">
+              <div class="ticon"><svg class="amark" viewBox="0 0 200 200"><use href="#apify"/></svg></div>
+              <div class="tbody"><div class="tlabel">Scanning listings</div><div class="tchips"><span class="tchip">Zillow + Realtor</span><span class="pay" id="pay2"><span class="basesq"></span>$0.09 USDC</span></div></div>
+            </div>
+
+            <div class="trow" id="r3" style="top:208px;">
+              <div class="ticon"><svg class="amark" viewBox="0 0 200 200"><use href="#apify"/></svg></div>
+              <div class="tbody"><div class="tlabel">Pulling comps &amp; price history</div><div class="tchips"><span class="tchip">Zillow</span><span class="pay" id="pay3"><span class="basesq"></span>$0.12 USDC</span></div></div>
+            </div>
+
+            <div class="trow" id="r4" style="top:312px;">
+              <div class="ticon"><svg class="amark" viewBox="0 0 200 200"><use href="#apify"/></svg></div>
+              <div class="tbody"><div class="tlabel">Projecting rental income</div><div class="tchips"><span class="tchip">Airbnb</span><span class="pay" id="pay4"><span class="basesq"></span>$0.08 USDC</span></div></div>
+            </div>
+
+            <div class="trow" id="r5" style="top:416px;">
+              <div class="ticon"><svg class="amark" viewBox="0 0 200 200"><use href="#apify"/></svg></div>
+              <div class="tbody"><div class="tlabel">Reading the neighborhood</div><div class="tchips"><span class="tchip">Google Maps</span><span class="pay" id="pay5"><span class="basesq"></span>$0.06 USDC</span></div></div>
+            </div>
+          </div>
+
+          <div class="atext" id="answer1" style="top:772px;"></div>
+
+          <!-- draft -->
+          <div id="draft">
+            <div class="dhead">
+              <svg class="pencil" viewBox="0 0 24 24" fill="none" stroke="#C9A06B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg>
+              <span class="dtitle">Draft</span>
+              <span class="dnote">offer to the listing agent</span>
+            </div>
+            <div class="dto">To: Jordan Vale &middot; Maple Row Realty</div>
+            <div class="dbody" id="draftbody"></div>
+          </div>
+
+          <div class="umsg" id="usermsg2" style="top:1392px;">Perfect, email it.</div>
+
+          <!-- send -->
+          <div class="trow" id="sendrow" style="top:1512px;left:90px;">
+            <div class="ticon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#9B968C" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></div>
+            <div class="tbody"><div class="tlabel">Sending the offer</div><div class="tchips"><span class="tchip">AgentMail</span><span class="pay" id="paySend"><span class="basesq"></span>$0.02 USDC</span><span class="sent" id="sentchip">Sent</span></div></div>
+          </div>
+
+          <div class="atext" id="confirm" style="top:1656px;"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      var DUR = 26;
+      function reps(cycle, from) { return Math.max(0, Math.ceil((DUR - from) / cycle) - 1); }
+      function setText(id, s) { var e = document.getElementById(id); if (e) e.textContent = s; }
+      function typer(id, text, t, dur) {
+        var o = { n: 0 };
+        tl.to(o, { n: text.length, duration: dur, ease: "none",
+          onUpdate: function () { setText(id, text.slice(0, Math.round(o.n))); } }, t);
+      }
+
+      /* ---- HOME (no greeting) ---- */
+      tl.set("#caret", { opacity: 0 }, 0);
+      tl.from("#inputbox", { y: 22, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.3);
+      tl.from("#chips .chip", { y: 12, opacity: 0, duration: 0.5, ease: "power2.out", stagger: 0.05 }, 0.5);
+
+      /* ---- TYPING ---- */
+      var prompt = "Find me a duplex under $400k in Columbus that could cash-flow as a rental.";
+      tl.to("#ph", { opacity: 0, duration: 0.2 }, 1.3);
+      tl.set("#caret", { opacity: 1 }, 1.35);
+      typer("typed", prompt, 1.4, 2.3);
+      tl.to("#caret", { opacity: 0, duration: 0.45, ease: "steps(1)", repeat: reps(0.9, 1.4), yoyo: true }, 1.4);
+
+      /* ---- SEND ---- */
+      tl.to("#home", { opacity: 0, duration: 0.4, ease: "power2.inOut" }, 4.3);
+      tl.to("#convo", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 4.5);
+      tl.from("#usermsg", { y: 22, opacity: 0, duration: 0.5, ease: "power3.out" }, 4.6);
+      tl.from("#workhead", { y: 14, opacity: 0, duration: 0.5, ease: "power2.out" }, 4.9);
+      tl.to("#spinner", { rotation: 360, duration: 1.0, ease: "none", transformOrigin: "50% 50%", repeat: 6 }, 5.0);
+      tl.fromTo("#conn", { scaleY: 0 }, { scaleY: 1, duration: 1.1, ease: "power1.inOut" }, 5.2);
+
+      /* ---- APIFY TOOL ROWS ---- */
+      var rows = ["#r1", "#r2", "#r3", "#r4", "#r5"];
+      var rt = [5.3, 6.2, 7.2, 8.2, 9.2];
+      rows.forEach(function (r, i) {
+        tl.from(r + " .ticon", { scale: 0.5, opacity: 0, duration: 0.4, ease: "back.out(2)", transformOrigin: "50% 50%" }, rt[i]);
+        tl.from(r + " .tlabel", { x: 16, opacity: 0, duration: 0.4, ease: "power2.out" }, rt[i] + 0.05);
+        tl.from(r + " .tchip", { opacity: 0, y: 8, duration: 0.32, ease: "power2.out" }, rt[i] + 0.32);
+      });
+
+      /* ---- PER-TOOL PAYMENT on Base + running total ---- */
+      tl.set('[data-composition-id="main"] .pay', { opacity: 0 }, 0);
+      tl.set("#sentchip", { opacity: 0 }, 0);
+      var totalObj = { v: 0 };
+      function payStep(id, t, to) {
+        tl.fromTo(id, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)", transformOrigin: "left center" }, t);
+        tl.to(totalObj, { v: to, duration: 0.45, ease: "power1.out", onUpdate: function () { setText("totval", "$" + totalObj.v.toFixed(2)); } }, t);
+        tl.fromTo("#total", { scale: 1 }, { scale: 1.07, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1, transformOrigin: "right center" }, t);
+      }
+      payStep("#pay2", 6.75, 0.09);
+      payStep("#pay3", 7.75, 0.21);
+      payStep("#pay4", 8.75, 0.29);
+      payStep("#pay5", 9.75, 0.35);
+
+      /* ---- WORKING -> DONE (seek-safe) ---- */
+      var clock = { t: 0 };
+      tl.to(clock, { t: DUR, duration: DUR, ease: "none", onUpdate: function () { setText("wt", clock.t >= 10.5 ? "Done" : "Working"); } }, 0);
+      tl.to("#spinner", { opacity: 0, duration: 0.4 }, 10.5);
+
+      /* ---- ANSWER 1: finding + the ask ---- */
+      var ans1 = "Top pick: a duplex on Maple Row, listed at $362,000, about 9% under comparable sales. Rent should cover the mortgage with about $285 a month left over. Quiet, walkable block. Want me to reach out to the listing agent? Here is a draft you could send by email, text, call, or mail:";
+      tl.from("#answer1", { opacity: 0, duration: 0.3 }, 10.7);
+      typer("answer1", ans1, 10.8, 4.1);
+
+      /* ---- DRAFT appears + scroll 1 ---- */
+      tl.set("#draft", { opacity: 0 }, 0);
+      tl.to("#thread", { y: -470, duration: 0.9, ease: "power2.inOut" }, 15.3);
+      tl.fromTo("#draft", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 15.6);
+      var draftMsg = "Hi Jordan, I'd like to make an offer on the Maple Row duplex. Financing is pre-approved and I can close in 21 days. Could we set up a quick call to talk terms?";
+      typer("draftbody", draftMsg, 16.0, 3.0);
+
+      /* ---- USER picks the channel + scroll 2 ---- */
+      tl.to("#thread", { y: -812, duration: 0.9, ease: "power2.inOut" }, 19.6);
+      tl.from("#usermsg2", { y: 18, opacity: 0, duration: 0.5, ease: "power3.out" }, 20.0);
+
+      /* ---- SEND row (paid on Base) + Sent ---- */
+      tl.from("#sendrow .ticon", { scale: 0.5, opacity: 0, duration: 0.4, ease: "back.out(2)", transformOrigin: "50% 50%" }, 20.6);
+      tl.from("#sendrow .tlabel", { x: 16, opacity: 0, duration: 0.4, ease: "power2.out" }, 20.65);
+      tl.from("#sendrow .tchip", { opacity: 0, y: 8, duration: 0.32, ease: "power2.out" }, 20.9);
+      tl.fromTo("#paySend", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)", transformOrigin: "left center" }, 21.2);
+      tl.fromTo("#sentchip", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)", transformOrigin: "left center" }, 21.9);
+
+      /* ---- CONFIRM ---- */
+      var conf = "Done. Your offer is on its way to Jordan Vale at Maple Row Realty. I'll flag the moment they reply. Total run: $0.37 on Base.";
+      tl.from("#confirm", { opacity: 0, duration: 0.3 }, 22.2);
+      typer("confirm", conf, 22.3, 2.7);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
