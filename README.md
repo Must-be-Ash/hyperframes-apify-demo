@@ -1,5 +1,7 @@
 # Agent‑session video — Apify endpoints, paid per call on Base
 
+> **Not maintained.** x402 and the services this uses may have changed since it was built; check the latest x402 docs before relying on it.
+
 A short [HyperFrames](https://hyperframes.heygen.com) video that simulates an AI agent (Claude‑desktop style) doing real work by calling **Apify** actors and paying **per tool call** in **USDC on Base**, then running an interactive, approval‑gated outreach. The whole thing renders from a single `index.html`.
 
 **1080×1080 · ~26s · silent motion graphic.** Demo render: [`demo/apify-deal-finder-1080.mp4`](demo/apify-deal-finder-1080.mp4)
